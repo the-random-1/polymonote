@@ -1,0 +1,18 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	background-color: #1b1f34;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+/*
+div
+	bg: #343c7e
+	border: #1b2556
+*/
