@@ -31,6 +31,8 @@ div {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	margin: 0;
+	padding: 0;
 }
 
 div.hidden {
@@ -65,15 +67,37 @@ div.signupcon div.signin {
 	height: calc(60vh - 2 * 3vh - 24px);
 }
 
+div.signupemailfincon div.signin {
+	width: calc(55vw - 2 * 5vw - 1vmax);
+	height: calc(50vh - 2 * 3vh - 1vmax);
+}
+
+div.signupemailfincon div.signin > div {
+	flex: 1;
+}
+
+div.signupemailfincon div.signin > div > div {
+	flex: 1;
+}
+
 div.signin h1 {
 	font-size: 4.3vw;
 	flex: 0;
+}
+
+div.signupemailfincon div.signin h1 {
+	font-size: 5vw;
 }
 
 div.signin > div.column > p {
 	font-size: 1.5vw;
 	flex: 0;
 	margin: 1.5vw 0;
+}
+
+div.signupemailfincon div.signin div p {
+	font-size: 1.7vw;
+	margin: 3vw 0 0 0;
 }
 
 div.credentials {
@@ -96,7 +120,7 @@ div.signin .btn:hover, div.signin .btn:focus {
 
 @keyframes signinbtnhover {
 	to {
-		background-color: #9148a0;
+		background-color: #a953b1;
 	}
 }
 div.signin .googlesignin {
@@ -166,12 +190,12 @@ div.signin p.signintext.v2 {
 	display: none;
 }
 
-div.signin p.signintext span {
+div.signin p.signintext span, div.signupemailfincon div.signin p span {
 	color: #2ffffc;
 	cursor: pointer;
 }
 
-div.signin p.signintext span:hover, div.signin p.signintext span:focus {
+div.signin p.signintext span:hover, div.signin p.signintext span:focus, div.signupemailfincon div.signin p span:hover, div.signupemailfincon div.signin p span:focus  {
 	animation: signintexthover 300ms forwards;
 }
 
@@ -183,8 +207,50 @@ div.signin p.signintext span:hover, div.signin p.signintext span:focus {
 
 
 
-div.maincon {
-	
+div.maincon div {
+	width: 100%;
+}
+
+div.maincon div.nav {
+	flex: 0 0 min(8.1vw, 11.3vh);
+	align-items: flex-end;
+	justify-content: space-evenly;
+	background: #0a1741;
+	border-bottom: 0.6vw solid #000523;
+	gap: 0.5vw;
+}
+
+div.maincon div.content {
+	flex: 1 1 0;
+	background: #2f3677;
+}
+
+div.maincon div.nav div.tab {
+	height: calc(min(5vw, 7vh) - 1.1vw - 0.6vw);
+	border: 0.6vw solid #000523;
+	border-bottom: none;
+	border-radius: 3vw 3vw 0 0;
+	padding: 1.1vw 1.5vw;
+	background: #4568c7;
+	font-size: min(2vw, 3vh);
+	font-family: "Martian Mono", monospace;
+	text-transform: uppercase;
+	overflow: hidden;
+}
+
+div.maincon div.nav div.tab div:not(.tabopt) {
+	flex: 1 1 0;
+}
+
+div.maincon div.nav div.tab div.tabopt {
+	flex: 0 0 0;
+	background: #4453ff;
+	border: 0.45vmax solid #000523;
+}
+
+div.maincon div.nav div.tab div.tabopt svg {
+	width: 2.5vw;
+	height: 2.5vw;
 }
 
 /* Narrower screen resolutions */
@@ -201,6 +267,18 @@ div.maincon {
 
 	div.signin > div.column > p {
 		font-size: max(2.5vw, 2.2vh);
+	}
+
+	div.signupemailfincon div.signin {
+		height: max(50vw, 35vh);
+	}
+
+	div.signupemailfincon div.signin h1 {
+		font-size: max(5vw, 3vh);
+	}
+
+	div.signupemailfincon div.signin div p {
+		font-size: max(2vw, 1.4vh);
 	}
 
 	div.signin .inp {
@@ -237,6 +315,27 @@ div.maincon {
 		flex-direction: row;
 	}
 
+	div.signupemailfincon div.signin {
+		width: calc(75vw - 2 * 5vw - 1vmax);
+		height: calc(50vh - 2 * 3vh - 1vmax);
+		padding: 3vh 5vw;
+		gap: 5vw;
+	}
+
+	div.signupemailfincon div.signin div {
+		height: 100%;
+		gap: 5vh;
+	}
+
+	div.signupemailfincon div.signin h1 {
+		font-size: 4.5vw;
+	}
+
+	div.signupemailfincon div.signin div p {
+		margin: 0;
+		font-size: 1.5vw;
+	}
+
 	div.signin div.credentials {
 		height: 100%;
 		align-content: center;
@@ -246,26 +345,18 @@ div.maincon {
 		flex-grow: 0;
 	}
 
-	div.signin > div.column > p {
-		/*font-size: 3vw;*/
-	}
-
 	div.signin .inp {
 		width: 70%;
 	}
 
 	div.signin .googlesignin {
 		font-size: 3.8vh;
-		/*width: max(min(18vw, 21vh), 15vw);
-		height: max(min(7vh, 8vw), 6vw);*/
 		width: 25vh;
 		height: 10vh;
 		border-radius: 3vh;
 	}
 
 	div.signin .btn svg {
-		/*width: max(4vmin, 3vh);
-		height: max(min(4vh, 4vw), 3vh);*/
 		width: 6vh;
 		height: 6vh;
 	}

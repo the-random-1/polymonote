@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<title>Polymonote</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@100..800&display=swap" rel="stylesheet">
+		<!-- <script type="module" src="main.js" defer></script> -->
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+			import { getDatabase, ref, get, set, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+			import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+			const firebaseConfig = {
+				apiKey: "AIzaSyDhQPjLDSDtyFLLLgrKRnQ5Gnk8Z6Z6q7M",
+				authDomain: "polymonote.firebaseapp.com",
+				databaseURL: "https://polymonote-default-rtdb.firebaseio.com",
+				projectId: "polymonote",
+				storageBucket: "polymonote.firebasestorage.app",
+				messagingSenderId: "36644175050",
+				appId: "1:36644175050:web:792b2904c84b5da9ca0833"
+			};
+
+
+			// export {m as ActionCodeOperation, ActionCodeURL, AuthCredential, v as AuthErrorCodes, EmailAuthCredential, EmailAuthProvider, FacebookAuthProvider, l as FactorId, GithubAuthProvider, GoogleAuthProvider, OAuthCredential, OAuthProvider, f as OperationType, PhoneAuthCredential, PhoneAuthProvider, PhoneMultiFactorGenerator, h as ProviderId, RecaptchaVerifier, SAMLAuthProvider, p as SignInMethod, TotpMultiFactorGenerator, TotpSecret, TwitterAuthProvider, applyActionCode, beforeAuthStateChanged, D as browserCookiePersistence, O as browserLocalPersistence, ne as browserPopupRedirectResolver, L as browserSessionPersistence, checkActionCode, confirmPasswordReset, connectAuthEmulator, createUserWithEmailAndPassword, g as debugErrorMap, deleteUser, fetchSignInMethodsForEmail, getAdditionalUserInfo, getAuth, getIdToken, getIdTokenResult, getMultiFactorResolver, getRedirectResult, S as inMemoryPersistence, V as indexedDBLocalPersistence, initializeAuth, initializeRecaptchaConfig, isSignInWithEmailLink, linkWithCredential, linkWithPhoneNumber, linkWithPopup, linkWithRedirect, multiFactor, onAuthStateChanged, onIdTokenChanged, parseActionCodeURL, _ as prodErrorMap, reauthenticateWithCredential, reauthenticateWithPhoneNumber, reauthenticateWithPopup, reauthenticateWithRedirect, reload, revokeAccessToken, sendEmailVerification, sendPasswordResetEmail, sendSignInLinkToEmail, setPersistence, signInAnonymously, signInWithCredential, signInWithCustomToken, signInWithEmailAndPassword, signInWithEmailLink, signInWithPhoneNumber, signInWithPopup, signInWithRedirect, signOut, unlink, updateCurrentUser, updateEmail, updatePassword, updatePhoneNumber, updateProfile, useDeviceLanguage, validatePassword, verifyBeforeUpdateEmail, verifyPasswordResetCode};
+
+
+
+			const app = initializeApp(firebaseConfig);
+			const auth = getAuth();
+			const provider = new GoogleAuthProvider();
+			const db = getDatabase(app);
+
+			function saveData(key, value) {
+				set(ref(db, key), value);
+			}
+
+			function removeData(key) {
+				set(ref(db, key), null);
+			}
+
+			/*
+			get(child(ref(db), ---------key---------)).then((value) => {
+				value = value.val();
+				
+
+			});
+			onValue(ref(db, ---------key---------), (snapshot) => {
+				snapshot = snapshot.val();
+
+				
+			});
+			*/
+
+			// signInWithEmailAndPassword(auth, "rrajeshlolxd@gmail.com", "abcd12")
+			// .then(userCred => {
+			// 	console.log(userCred.user);
+			// })
+			// .catch(error => {
+			// 	console.log(error.code);
+			// 	console.log(error.message);
+			// });
+
+			// signInWithPopup(auth, provider)
+			//   .then((result) => {
+			//     // This gives you a Google Access Token. You can use it to access the Google API.
+			//     const credential = GoogleAuthProvider.credentialFromResult(result);
+			//     const token = credential.accessToken;
+			//     // The signed-in user info.
+			//     const user = result.user;
+			//     // IdP data available using getAdditionalUserInfo(result)
+			//     // ...
+			//   }).catch((error) => {
+			//     // Handle Errors here.
+			//     const errorCode = error.code;
+			//     const errorMessage = error.message;
+			//     // The email of the user's account used.
+			//     const email = error.customData.email;
+			//     // The AuthCredential type that was used.
+			//     const credential = GoogleAuthProvider.credentialFromError(error);
+			//     // ...
+			//   });
+
+			// signInWithRedirect(auth, provider);
+			
+			document.styleSheets[document.styleSheets.length - 1].deleteRule(4);
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</head>
+	<body>
+		<div class="maincon column con">
+			<div class="nav">
+				<div class="tab">
+					<div>Calendar</div>
+					<div class="tabopt">
+						<svg viewBox="0 0 24 24">
+							<path d="M6 9l6 6 6-6" stroke="white" stroke-width="3" fill="none"/>
+						</svg>
+					</div>
+				</div>
+				<div class="tab">test2</div>
+				<div class="tab">test3</div>
+			</div>
+			<div class="content">
+				
+			</div>
+		</div>
+	</body>
+</html>
