@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<title>Polymonote</title>
+		<link rel="stylesheet" type="text/css" href="main.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@100..800&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Stack+Sans+Text:wght@200..700&display=swap" rel="stylesheet">
+		<script type="module" src="main.js" defer></script>
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+			import { getDatabase, ref, get, set, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+			import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, signInWithEmailLink, isSignInWithEmailLink } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+			const firebaseConfig = {
+				apiKey: "AIzaSyDhQPjLDSDtyFLLLgrKRnQ5Gnk8Z6Z6q7M",
+				authDomain: "polymonote.firebaseapp.com",
+				databaseURL: "https://polymonote-default-rtdb.firebaseio.com",
+				projectId: "polymonote",
+				storageBucket: "polymonote.firebasestorage.app",
+				messagingSenderId: "36644175050",
+				appId: "1:36644175050:web:792b2904c84b5da9ca0833"
+			};
+
+
+			// ActionCodeOperation, ActionCodeURL, AuthCredential, AuthErrorCodes, EmailAuthCredential, EmailAuthProvider,
+			// FacebookAuthProvider, FactorId, GithubAuthProvider, GoogleAuthProvider, OAuthCredential, OAuthProvider, OperationType,
+			// PhoneAuthCredential, PhoneAuthProvider, PhoneMultiFactorGenerator, ProviderId, RecaptchaVerifier, SAMLAuthProvider, SignInMethod,
+			// TotpMultiFactorGenerator, TotpSecret, TwitterAuthProvider, applyActionCode, beforeAuthStateChanged, browserCookiePersistence,
+			// browserLocalPersistence, browserPopupRedirectResolver, browserSessionPersistence, checkActionCode, confirmPasswordReset,
+			// connectAuthEmulator, createUserWithEmailAndPassword, debugErrorMap, deleteUser, fetchSignInMethodsForEmail, getAdditionalUserInfo,
+			// getAuth, getIdToken, getIdTokenResult, getMultiFactorResolver, getRedirectResult, inMemoryPersistence, indexedDBLocalPersistence,
+			// initializeAuth, initializeRecaptchaConfig, isSignInWithEmailLink, linkWithCredential, linkWithPhoneNumber, linkWithPopup, linkWithRedirect,
+			// multiFactor, onAuthStateChanged, onIdTokenChanged, parseActionCodeURL, prodErrorMap, reauthenticateWithCredential,
+			// reauthenticateWithPhoneNumber, reauthenticateWithPopup, reauthenticateWithRedirect, reload, revokeAccessToken, sendEmailVerification,
+			// sendPasswordResetEmail, sendSignInLinkToEmail, setPersistence, signInAnonymously, signInWithCredential, signInWithCustomToken,
+			// signInWithEmailAndPassword, signInWithEmailLink, signInWithPhoneNumber, signInWithPopup, signInWithRedirect, signOut, unlink,
+			// updateCurrentUser, updateEmail, updatePassword, updatePhoneNumber, updateProfile, useDeviceLanguage, validatePassword,
+			// verifyBeforeUpdateEmail, verifyPasswordResetCode
+
+
+			const app = initializeApp(firebaseConfig);
+			const auth = getAuth();
+			const provider = new GoogleAuthProvider();
+			const db = getDatabase(app);
+
+			function saveData(key, value) {
+				set(ref(db, key), value);
+			}
+
+			function removeData(key) {
+				set(ref(db, key), null);
+			}
+
+			function displayErrorMessage(error) {
+				let errorCode = error.code.substr(5);
+				let msgObj = {title: "", text: "", icon: "warning"};
+
+				switch (errorCode) {
+					case "popup-blocked":
+						msgObj.title = "Pop-up Error";
+						msgObj.text = "The sign-in pop-up was automatically blocked by your browser. Please disable any pop-up blockers you have active in order to sign in.";
+						break;
+					case "popup-closed-by-user":
+						msgObj.title = "Sign-in Pop-up was Closed";
+						msgObj.text = "Do not close the sign-in pop-up before you finish signing in.";
+						break;
+					case "cancelled-popup-request":
+						msgObj.title = "Pop-up Canceled";
+						msgObj.text = "The sign-in popup was cancelled. Please try again.";
+						break;
+					case "account-exists-with-different-credential":
+						msgObj.title = "Account Already Exists";
+						msgObj.text = "Your account already exists with a different sign-in credential.";
+						break;
+					case "email-already-in-use":
+						msgObj.title = "Email Error";
+						msgObj.text = "Your email is already in use.";
+						break;
+					case "invalid-credential":
+						msgObj.title = "Invalid Login Credential";
+						msgObj.text = "You might've entered your email or password incorrectly.";
+						break;
+					case "user-disabled":
+						msgObj.title = "User Disabled";
+						msgObj.text = "Your account has been disabled.";
+						break;
+					case "network-request-failed":
+						msgObj.title = "Connection Error";
+						msgObj.text = "Check your internet or firewall settings.";
+						break;
+					case "timeout":
+						msgObj.title = "Timeout";
+						msgObj.text = "Request took too long and was aborted.";
+						break;
+					case "invalid-email":
+						msgObj.title = "Invalid Email";
+						msgObj.text = "The email you entered was invalid. Please format it correctly.";
+						break;
+					case "missing-email":
+						msgObj.title = "Missing Email";
+						msgObj.text = "Email field was empty.";
+						break;
+					case "missing-password":
+						msgObj.title = "Missing Password";
+						msgObj.text = "Password field was empty.";
+						break;
+					case "weak-password":
+						msgObj.title = "Weak Password";
+						msgObj.text = "Password must be at least 6 characters long and include at least 1 number.";
+						break;
+					case "email-already-in-use":
+						msgObj.title = "Email Already In Use";
+						msgObj.text = "Your email is already in use in an account.";
+						break;
+					case "too-many-requests":
+						msgObj.title = "Too Many Requests";
+						msgObj.text = "You have made too many requests recently. Please try again later.";
+						break;
+					case "quota-exceeded":
+						msgObj.title = "Daily Limit Exceeded";
+						msgObj.text = "You have reached the daily limit of amount of emails sent to you. Please try again tomorrow.";
+						break;
+					case "wrong-password":
+						msgObj.title = "Incorrect Password";
+						msgObj.text = "The password you have entered is incorrect.";
+						break;
+					case "invalid-action-code":
+						msgObj.title = "Invalid Action Code";
+						msgObj.text = "The code or link provided is invalid. Please try again.";
+						break;
+					case "expired-action-code":
+						msgObj.title = "Expired";
+						msgObj.text = "The provided code/link has expired.";
+						break;
+					case "invalid-oob-code":
+						msgObj.title = "Invalid OOB Code";
+						msgObj.text = "The OOB code provided is invalid.";
+						break;
+					default:
+						msgObj.title = "Error";
+						let errorStr = errorCode.replaceAll("-", " ");
+						msgObj.text = errorStr.charAt(0).toUpperCase() + errorStr.substr(1) + ".";
+				}
+
+				setTimeout(() => {Swal.fire(msgObj);}, 0);
+			}
+
+			/*
+			get(child(ref(db), ---------key---------)).then((value) => {
+				value = value.val();
+				
+
+			});
+			onValue(ref(db, ---------key---------), (snapshot) => {
+				snapshot = snapshot.val();
+
+				
+			});
+			*/
+
+			// ------------
+			// Code starts
+			// ------------
+			
+			document.styleSheets[document.styleSheets.length - 1].deleteRule(4);
+
+			function strToPixel(str) {
+				const e = document.createElement("div");
+				e.style.position = "absolute";
+				e.style.visibility = "hidden";
+				e.style.width = str;
+				document.body.appendChild(e);
+				
+				let val = window.getComputedStyle(e).width;
+				e.remove();
+				
+				return parseFloat(val);
+			}
+
+			/*while (document.getElementById("xyz").offsetHeight > calc(getComputedStyle(document.documentElement).getPropertyValue('--contentwindowscale')) * 0.2 && window.getComputedStyle(document.getElementById("xyz")).fontSize.substring(0,window.getComputedStyle(document.getElementById("xyz")).fontSize.indexOf("p")) > calc(getComputedStyle(document.documentElement).getPropertyValue('--contentwindowscale')) * 0.031) {
+document.getElementById("xyz").style.fontSize = (Number(window.getComputedStyle(document.getElementById("xyz")).fontSize.substring(0,window.getComputedStyle(document.getElementById("xyz")).fontSize.indexOf("p"))) - 1) + "px";
+}*/
+
+			onAuthStateChanged(auth, (user) => {
+				if (user) {
+					console.log("signed in");
+					console.log(user);
+					console.log(user.uid);
+					document.querySelector(".maincon .accounthome .emailtxthome .emailhome").innerText = user.email;
+				} else {
+					console.log("signed out");
+				}
+			});
+
+			for (var tab of document.querySelectorAll(".maincon .tab")) {
+				let cl = tab.classList[1];
+				tab.addEventListener("click", () => {
+					console.log(cl);
+				});
+				tab.children[1].children[1].addEventListener("click", (e) => {
+					e.stopPropagation();
+					console.log(cl + " opt");
+				});
+			}
+
+			// let focusedtask;
+			// let focusedtaskx;
+
+			// window.addEventListener("mousemove", e => {
+			// 	let x = document.getElementById("h");
+			// 	x.style.left = e.clientX - x.clientWidth / 2 + "px";
+			// 	x.style.top = e.clientY - x.clientHeight / 2 + "px";
+			// });
+
+			// window.addEventListener("mouseup", () => {
+			// 	if (focusedtask) {
+			// 		focusedtask.style.background = "linear-gradient(to right, #00179b " + Math.round(100 * focusedtaskx / focusedtask.clientWidth) + "%, #030b57 0%)";
+			// 		focusedtask = null;
+			// 		focusedtaskx = null;
+			// 	}
+			// });
+
+			// document.querySelectorAll(".tasks .task").forEach(task => {
+			// 	task.addEventListener("mousedown", e => {
+			// 		focusedtask = task;
+			// 		focusedtaskx = e.offsetX;
+			// 		focusedtask.style.background = "linear-gradient(to right, #00179b " + 100 * focusedtaskx / focusedtask.clientWidth + "%, #030b57 0%)";
+			// 		console.log(e)
+			// 		console.log(task)
+			// 	});
+
+			// 	task.addEventListener("mousemove", e => {
+			// 		if (task == focusedtask) {
+			// 			focusedtaskx = e.offsetX;
+			// 			focusedtask.style.background = "linear-gradient(to right, #00179b " + 100 * focusedtaskx / focusedtask.clientWidth + "%, #030b57 0%)";
+			// 			console.log(e)
+			// 		}
+			// 	});
+			// });
+
+			let taskscreensize = 0
+
+			document.querySelector(".tasks .changesizecon").addEventListener("click", () => {
+				taskscreensize = (taskscreensize + 1) % 3;
+				let tasks = document.querySelector(".tasks")
+				tasks.classList.remove("small");
+				tasks.classList.remove("medium");
+				tasks.classList.remove("large");
+				
+				tasks.classList.add(["small", "medium", "large"][taskscreensize]);
+			});
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</head>
+	<body>
+		<!-- <div id="h" style="position: absolute; width: 500px; height: 500px; opacity: 0.25; background: radial-gradient(rgb(82, 134, 255), #030b57 50%); border-radius: 100vh;"></div> -->
+		<div class="maincon column con">
+			<div class="heading">
+				<h1>Polymonote</h1>
+				<div class="menu">
+					<svg width="50px" height="50px" viewBox="3 3 18 18" fill="none">
+						<path d="M4 18L20 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+						<path d="M4 12L20 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+						<path d="M4 6L20 6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+					</svg>
+				</div>
+			</div>
+			<div class="bottom column">
+				<div class="nav">
+					<div class="navinner">
+						<div tabindex="0" class="tab hometab">
+							<div class="icon">
+								<svg viewBox="3 3 18 18" fill="none">
+									<path d="M20 11.75C19.8376 11.7507 19.6795 11.698 19.55 11.6L12 5.94L4.45 11.6C4.29087 11.7193 4.09085 11.7706 3.89394 11.7425C3.69702 11.7143 3.51935 11.6091 3.4 11.45C3.28066 11.2909 3.22941 11.0908 3.25754 10.8939C3.28567 10.697 3.39087 10.5193 3.55 10.4L11.55 4.4C11.6798 4.30263 11.8377 4.25 12 4.25C12.1623 4.25 12.3202 4.30263 12.45 4.4L20.45 10.4C20.5952 10.5179 20.6911 10.6859 20.7189 10.8709C20.7466 11.0559 20.7042 11.2446 20.6 11.4C20.5363 11.503 20.4482 11.5888 20.3436 11.6498C20.239 11.7108 20.121 11.7452 20 11.75Z" fill="white"/>
+									<path d="M18 19.75H6C5.80189 19.7474 5.61263 19.6676 5.47253 19.5275C5.33244 19.3874 5.25259 19.1981 5.25 19V9.5C5.25 9.30109 5.32902 9.11032 5.46967 8.96967C5.61032 8.82902 5.80109 8.75 6 8.75C6.19891 8.75 6.38968 8.82902 6.53033 8.96967C6.67098 9.11032 6.75 9.30109 6.75 9.5V18.25H17.25V9.5C17.25 9.30109 17.329 9.11032 17.4697 8.96967C17.6103 8.82902 17.8011 8.75 18 8.75C18.1989 8.75 18.3897 8.82902 18.5303 8.96967C18.671 9.11032 18.75 9.30109 18.75 9.5V19C18.7474 19.1981 18.6676 19.3874 18.5275 19.5275C18.3874 19.6676 18.1981 19.7474 18 19.75Z" fill="white"/>
+									<path d="M14 19.75C13.8019 19.7474 13.6126 19.6676 13.4725 19.5275C13.3324 19.3874 13.2526 19.1981 13.25 19V12.75H10.75V19C10.75 19.1989 10.671 19.3897 10.5303 19.5303C10.3897 19.671 10.1989 19.75 10 19.75C9.80109 19.75 9.61032 19.671 9.46967 19.5303C9.32902 19.3897 9.25 19.1989 9.25 19V12C9.25259 11.8019 9.33244 11.6126 9.47253 11.4725C9.61263 11.3324 9.80189 11.2526 10 11.25H14C14.1981 11.2526 14.3874 11.3324 14.5275 11.4725C14.6676 11.6126 14.7474 11.8019 14.75 12V19C14.7474 19.1981 14.6676 19.3874 14.5275 19.5275C14.3874 19.6676 14.1981 19.7474 14 19.75Z" fill="white"/>
+								</svg>
+							</div>
+							<div class="tabcontent">
+								<div class="label">Home</div>
+								<div tabindex="0" class="tabopt">
+									<svg viewBox="0 0 24 24">
+										<path d="M6 9l6 6 6-6" stroke="white" stroke-width="3" fill="none"/>
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div tabindex="0" class="tab taskstab">
+							<div class="icon">
+								<svg viewBox="-2 0 32 34" version="1.1">
+									<g stroke="none" stroke-width="9" fill="none" fill-rule="evenodd">
+										<g transform="translate(-466.000000, -99.000000)" fill="white">
+											<path d="M487,113 L473,113 C472.447,113 472,113.448 472,114 C472,114.553 472.447,115 473,115 L487,115 C487.553,115 488,114.553 488,114 C488,113.448 487.553,113 487,113 L487,113 Z M492,127 C492,128.104 491.104,129 490,129 L470,129 C468.896,129 468,128.104 468,127 L468,107 C468,105.896 468.896,105 470,105 L473,105 L473,109 L487,109 L487,105 L490,105 C491.104,105 492,105.896 492,107 L492,127 L492,127 Z M475,103 L477.223,103 C477.223,101.896 478.466,101 480,101 C481.534,101 482.777,101.896 482.777,103 L485,103 L485,107 L475,107 L475,103 L475,103 Z M490,103 L487,103 L487,101 L484.307,101 C483.44,99.81 481.846,99 480,99 C478.154,99 476.56,99.81 475.693,101 L473,101 L473,103 L470,103 C467.791,103 466,104.791 466,107 L466,127 C466,129.209 467.791,131 470,131 L490,131 C492.209,131 494,129.209 494,127 L494,107 C494,104.791 492.209,103 490,103 L490,103 Z M487,123 L473,123 C472.447,123 472,123.448 472,124 C472,124.553 472.447,125 473,125 L487,125 C487.553,125 488,124.553 488,124 C488,123.448 487.553,123 487,123 L487,123 Z M487,118 L473,118 C472.447,118 472,118.448 472,119 C472,119.553 472.447,120 473,120 L487,120 C487.553,120 488,119.553 488,119 C488,118.448 487.553,118 487,118 L487,118 Z"/>
+										</g>
+									</g>
+								</svg>
+							</div>
+							<div class="tabcontent">
+								<div class="label">Tasks</div>
+								<div tabindex="0" class="tabopt">
+									<svg viewBox="0 0 24 24">
+										<path d="M6 9l6 6 6-6" stroke="white" stroke-width="3" fill="none"//>
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div tabindex="0" class="tab calendartab">
+							<div class="icon">
+								<svg viewBox="2 1 20 20" fill="none">
+									<g>
+										<path stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" d="M8 4H7.2002C6.08009 4 5.51962 4 5.0918 4.21799C4.71547 4.40973 4.40973 4.71547 4.21799 5.0918C4 5.51962 4 6.08009 4 7.2002V8M8 4H16M8 4V2M16 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V8M16 4V2M4 8V16.8002C4 17.9203 4 18.4801 4.21799 18.9079C4.40973 19.2842 4.71547 19.5905 5.0918 19.7822C5.5192 20 6.07899 20 7.19691 20H16.8031C17.921 20 18.48 20 18.9074 19.7822C19.2837 19.5905 19.5905 19.2842 19.7822 18.9079C20 18.4805 20 17.9215 20 16.8036V8M4 8H20M16 16H16.002L16.002 16.002L16 16.002V16ZM12 16H12.002L12.002 16.002L12 16.002V16ZM8 16H8.002L8.00195 16.002L8 16.002V16ZM16.002 12V12.002L16 12.002V12H16.002ZM12 12H12.002L12.002 12.002L12 12.002V12ZM8 12H8.002L8.00195 12.002L8 12.002V12Z"/>
+									</g>
+								</svg>
+							</div>
+							<div class="tabcontent">
+								<div class="label">Calendar</div>
+								<div tabindex="0" class="tabopt">
+									<svg viewBox="0 0 24 24">
+										<path d="M6 9l6 6 6-6" stroke="white" stroke-width="3" fill="none"/>
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div tabindex="0" class="tab commitmentstab">
+							<div class="icon">
+								<svg viewBox="0 0 24 24" fill="white">
+									<path d="M23,11a1,1,0,0,0-1,1,10.034,10.034,0,1,1-2.9-7.021A.862.862,0,0,1,19,5H16a1,1,0,0,0,0,2h3a3,3,0,0,0,3-3V1a1,1,0,0,0-2,0V3.065A11.994,11.994,0,1,0,24,12,1,1,0,0,0,23,11Z M12,6a1,1,0,0,0-1,1v5a1,1,0,0,0,.293.707l3,3a1,1,0,0,0,1.414-1.414L13,11.586V7A1,1,0,0,0,12,6Z"/>
+								</svg>
+							</div>
+							<div class="tabcontent">
+								<div class="label">Commitments</div>
+								<div tabindex="0" class="tabopt">
+									<svg viewBox="0 0 24 24">
+										<path d="M6 9l6 6 6-6" stroke="white" stroke-width="3" fill="none"//>
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div tabindex="0" class="tab accounttab">
+							<div class="icon">
+								<svg viewBox="1 1 22 22" fill="none">
+									<circle cx="12" cy="9" r="3" stroke="white" stroke-width="1.5"/>
+									<circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.5"/>
+									<path stroke="white" stroke-width="1.5" stroke-linecap="round" d="M17.9691 20C17.81 17.1085 16.9247 15 11.9999 15C7.07521 15 6.18991 17.1085 6.03076 20"/>
+								</svg>
+							</div>
+							<div class="tabcontent">
+								<div class="label">Account</div>
+								<div tabindex="0" class="tabopt">
+									<svg viewBox="0 0 24 24">
+										<path d="M6 9l6 6 6-6" stroke="white" stroke-width="3" fill="none"//>
+									</svg>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="content">
+					<div class="home column" style="display: none;">
+					<!-- <div class="home column"> -->
+						<div class="sections column">
+							<div class="sectionsheading">
+								<svg viewBox="0 0 24 24" fill="none">
+									<path d="M16.19 2H12.75V8V8.75V13.75H22V8.75V8V7.81C22 4.17 19.83 2 16.19 2Z"/>
+									<path d="M2 10.25V15.25V15.75V16.19C2 19.83 4.17 22 7.81 22H11.25V15.75V15.25V10.25H2Z"/>
+									<path d="M11.25 2V8.75H2V7.81C2 4.17 4.17 2 7.81 2H11.25Z"/>
+									<path d="M22 15.25V16.19C22 19.83 19.83 22 16.19 22H12.75V15.25H22Z"/>
+								</svg>
+								<h1>Sections</h1>
+							</div>
+							<div class="sectionslist">
+								<div class="sectionitem column">
+									<div class="editsection" tabindex="0">
+										<svg viewBox="4 3 17 17">
+											<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+										</svg>
+									</div>
+
+									<div class="sectionitemheading">
+										<p>AP Pre-Calculus</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Tasks</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Events</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemdailycommitments sectionitemdetail">
+										<p tabindex="0">Daily&nbsp;Commitments</p>
+										<p>0</p>
+									</div>
+								</div>
+								<div class="sectionitem column">
+									<div class="editsection" tabindex="0">
+										<svg viewBox="4 3 17 17">
+											<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+										</svg>
+									</div>
+
+									<div class="sectionitemheading">
+										<p>AP Pre-Calculus</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Tasks</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Events</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemdailycommitments sectionitemdetail">
+										<p tabindex="0">Daily&nbsp;Commitments</p>
+										<p>0</p>
+									</div>
+								</div>
+								<div class="sectionitem column">
+									<div class="editsection" tabindex="0">
+										<svg viewBox="4 3 17 17">
+											<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+										</svg>
+									</div>
+
+									<div class="sectionitemheading">
+										<p>AP Pre-Calculus</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Tasks</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Events</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemdailycommitments sectionitemdetail">
+										<p tabindex="0">Daily&nbsp;Commitments</p>
+										<p>0</p>
+									</div>
+								</div>
+								<div class="sectionitem column">
+									<div class="editsection" tabindex="0">
+										<svg viewBox="4 3 17 17">
+											<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+										</svg>
+									</div>
+
+									<div class="sectionitemheading">
+										<p>AP Pre-Calculus</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Tasks</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Events</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemdailycommitments sectionitemdetail">
+										<p tabindex="0">Daily&nbsp;Commitments</p>
+										<p>0</p>
+									</div>
+								</div>
+								<div class="sectionitem column">
+									<div class="editsection" tabindex="0">
+										<svg viewBox="4 3 17 17">
+											<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+										</svg>
+									</div>
+
+									<div class="sectionitemheading">
+										<p>AP Pre-Calculus</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Tasks</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Events</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemdailycommitments sectionitemdetail">
+										<p tabindex="0">Daily&nbsp;Commitments</p>
+										<p>0</p>
+									</div>
+								</div>
+								<div class="sectionitem column">
+									<div class="editsection" tabindex="0">
+										<svg viewBox="4 3 17 17">
+											<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+										</svg>
+									</div>
+
+									<div class="sectionitemheading">
+										<p>Advanced Placement Physics C Electricity and Magnetism</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Tasks</p>
+										<p>123</p>
+									</div>
+									<div class="sectionitemtasks sectionitemdetail">
+										<p tabindex="0">Events</p>
+										<p>0</p>
+									</div>
+									<div class="sectionitemdailycommitments sectionitemdetail">
+										<p tabindex="0">Daily&nbsp;Commitments</p>
+										<p>123</p>
+									</div>
+								</div>
+								<div class="sectionitem addsection column" tabindex="0">
+									<div>
+										<svg viewBox="0 0 24 24" fill="none">
+											<path d="M4 12H20M12 4V20" stroke="white" stroke-width="4" stroke-linecap="square"/>
+										</svg>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="taskshome column">
+							<div class="taskshomeheading headinghome" tabindex="0">
+								<svg viewBox="-2 0 32 34" version="1.1" fill="none">
+									<g stroke="none" stroke-width="9" fill-rule="evenodd">
+										<g transform="translate(-466.000000, -99.000000)">
+											<path d="M487,113 L473,113 C472.447,113 472,113.448 472,114 C472,114.553 472.447,115 473,115 L487,115 C487.553,115 488,114.553 488,114 C488,113.448 487.553,113 487,113 L487,113 Z M492,127 C492,128.104 491.104,129 490,129 L470,129 C468.896,129 468,128.104 468,127 L468,107 C468,105.896 468.896,105 470,105 L473,105 L473,109 L487,109 L487,105 L490,105 C491.104,105 492,105.896 492,107 L492,127 L492,127 Z M475,103 L477.223,103 C477.223,101.896 478.466,101 480,101 C481.534,101 482.777,101.896 482.777,103 L485,103 L485,107 L475,107 L475,103 L475,103 Z M490,103 L487,103 L487,101 L484.307,101 C483.44,99.81 481.846,99 480,99 C478.154,99 476.56,99.81 475.693,101 L473,101 L473,103 L470,103 C467.791,103 466,104.791 466,107 L466,127 C466,129.209 467.791,131 470,131 L490,131 C492.209,131 494,129.209 494,127 L494,107 C494,104.791 492.209,103 490,103 L490,103 Z M487,123 L473,123 C472.447,123 472,123.448 472,124 C472,124.553 472.447,125 473,125 L487,125 C487.553,125 488,124.553 488,124 C488,123.448 487.553,123 487,123 L487,123 Z M487,118 L473,118 C472.447,118 472,118.448 472,119 C472,119.553 472.447,120 473,120 L487,120 C487.553,120 488,119.553 488,119 C488,118.448 487.553,118 487,118 L487,118 Z"/>
+										</g>
+									</g>
+								</svg>
+								<h1>Tasks</h1>
+							</div>
+							<div class="tasklisthome">
+								<div class="taskhome column">
+									<div class="taskhometoprow">
+										<div class="taskhomedesc" tabindex="0">
+											<p>GYt8n7t*& GYt8n7t GYt8n7t*& GYt8n7t*& fts sgwy f6w7gsyu sg7wbys</p>
+										</div>
+										<div class="taskhomepercent">50%</div>
+									</div>
+									<div class="taskhomebottomrow">
+										<div class="taskhomesection">AP Pre-Calculus</div>
+										<div class="taskhomedate">Apr 8 2024</div>
+									</div>
+								</div>
+								<div class="taskhome column">
+									<div class="taskhometoprow">
+										<div class="taskhomedesc" tabindex="0">
+											<p>abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz</p>
+										</div>
+										<div class="taskhomepercent">50%</div>
+									</div>
+									<div class="taskhomebottomrow">
+										<div class="taskhomesection">Advanced Placement Physics C Electricity and Magnetism</div>
+										<div class="taskhomedate">Day After Tomorrow</div>
+									</div>
+								</div>
+								<div class="taskhome column">
+									<div class="taskhometoprow">
+										<div class="taskhomedesc" tabindex="0">
+											<p>GYtt76 %%f6 7vtyJY8n7t*&</p>
+										</div>
+										<div class="taskhomepercent">50%</div>
+									</div>
+									<div class="taskhomebottomrow">
+										<div class="taskhomesection">Advanced Placement Physics C Electricity and Magnetism</div>
+										<div class="taskhomedate"></div>
+									</div>
+								</div>
+								<div class="taskhome column">
+									<div class="taskhometoprow">
+										<div class="taskhomedesc" tabindex="0">
+											<p>t6734cbcb47t</p>
+										</div>
+										<div class="taskhomepercent">50%</div>
+									</div>
+									<div class="taskhomebottomrow">
+										<div class="taskhomesection">AP Pre-Calculus</div>
+										<div class="taskhomedate">Tomorrow</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="calendarhome column">
+							<div class="calendarhomeheading headinghome" tabindex="0">
+								<svg viewBox="2 1 20 20" style="fill: none;">
+									<g>
+										<path stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" d="M8 4H7.2002C6.08009 4 5.51962 4 5.0918 4.21799C4.71547 4.40973 4.40973 4.71547 4.21799 5.0918C4 5.51962 4 6.08009 4 7.2002V8M8 4H16M8 4V2M16 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V8M16 4V2M4 8V16.8002C4 17.9203 4 18.4801 4.21799 18.9079C4.40973 19.2842 4.71547 19.5905 5.0918 19.7822C5.5192 20 6.07899 20 7.19691 20H16.8031C17.921 20 18.48 20 18.9074 19.7822C19.2837 19.5905 19.5905 19.2842 19.7822 18.9079C20 18.4805 20 17.9215 20 16.8036V8M4 8H20M16 16H16.002L16.002 16.002L16 16.002V16ZM12 16H12.002L12.002 16.002L12 16.002V16ZM8 16H8.002L8.00195 16.002L8 16.002V16ZM16.002 12V12.002L16 12.002V12H16.002ZM12 12H12.002L12.002 12.002L12 12.002V12ZM8 12H8.002L8.00195 12.002L8 12.002V12Z"/>
+									</g>
+								</svg>
+								<h1>Calendar</h1>
+							</div>
+							<div class="eventshome column">
+								<h1>Ongoing Events</h1>
+								<div class="ongoingeventshome">
+									<div class="eventhome column">
+										<div class="eventdatesummaryhome">ends in 16 hours</div>
+										<div class="hr"></div>
+										<div class="eventnamehome" tabindex="0">cool event</div>
+										<div class="eventdeschome">this is when all the cool stuff happens (never) this is when all the cool stuff happens (never)</div>
+										<div class="eventdatesconhome column">
+											<div class="hr"></div>
+											<div class="eventdateshome">
+												<div class="eventstartdatehome">June 25 2026</div>
+												<div class="vr"></div>
+												<div class="eventenddatehome">September 25 2026</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<h1>Upcoming Events</h1>
+								<div class="upcomingeventshome">
+									<div class="eventhome column">
+										<div class="eventdatesummaryhome">in 3 days</div>
+										<div class="hr"></div>
+										<div class="eventnamehome" tabindex="0">cool event</div>
+										<div class="eventdeschome">this is when all the cool stuff happens (never) this is when all the cool stuff happens (never)</div>
+										<div class="eventdatesconhome column">
+											<div class="hr"></div>
+											<div class="eventdateshome">
+												<div class="eventstartdatehome">June 25 2026</div>
+												<div class="vr"></div>
+												<div class="eventenddatehome">September 25 2026</div>
+											</div>
+										</div>
+									</div>
+									<div class="eventhome column">
+										<div class="eventdatesummaryhome">in 3 days</div>
+										<div class="hr"></div>
+										<div class="eventnamehome" tabindex="0">cool event</div>
+										<div class="eventdeschome">this is when all the cool stuff happens</div>
+										<div class="eventdatesconhome column">
+											<div class="hr"></div>
+											<div class="eventdateshome">
+												<div class="eventstartdatehome">June 25 2026</div>
+												<div class="vr"></div>
+												<div class="eventenddatehome">September 25 2026</div>
+											</div>
+										</div>
+									</div>
+									<div class="eventhome column">
+										<div class="eventdatesummaryhome">in 3 days</div>
+										<div class="hr"></div>
+										<div class="eventnamehome" tabindex="0">cool event</div>
+										<div class="eventdeschome">this is when all the cool stuff happens (never) this is when all the cool stuff happens (never)</div>
+										<div class="eventdatesconhome column">
+											<div class="hr"></div>
+											<div class="eventdateshome">
+												<div class="eventstartdatehome">June 25 2026</div>
+												<div class="vr"></div>
+												<div class="eventenddatehome">September 25 2026</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<h1>Past Events</h1>
+								<div class="pasteventshome">
+									<div class="eventhome column">
+										<div class="eventdatesummaryhome">7 months ago</div>
+										<div class="hr"></div>
+										<div class="eventnamehome" tabindex="0">cool event</div>
+										<div class="eventdeschome">this is when all the cool stuff happens (never) this is when all the cool stuff happens (never)</div>
+										<div class="eventdatesconhome column">
+											<div class="hr"></div>
+											<div class="eventdateshome">
+												<div class="eventstartdatehome">June 25 2026</div>
+												<div class="vr"></div>
+												<div class="eventenddatehome">September 25 2026</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="commitmentshome column">
+							<div class="commitmentshomeheading headinghome" tabindex="0">
+								<svg viewBox="0 0 24 24">
+									<path d="M23,11a1,1,0,0,0-1,1,10.034,10.034,0,1,1-2.9-7.021A.862.862,0,0,1,19,5H16a1,1,0,0,0,0,2h3a3,3,0,0,0,3-3V1a1,1,0,0,0-2,0V3.065A11.994,11.994,0,1,0,24,12,1,1,0,0,0,23,11Z M12,6a1,1,0,0,0-1,1v5a1,1,0,0,0,.293.707l3,3a1,1,0,0,0,1.414-1.414L13,11.586V7A1,1,0,0,0,12,6Z"/>
+								</svg>
+								<h1>Commitments</h1>
+							</div>
+							<div class="allcommitmentlisthome column">
+								<div class="dailych ch column">
+									<h1>Daily<span class="timelefthome">(10 hours left)</span></h1>
+									<div class="commitmentlisthome urgent">
+										<div class="commitmenthome">
+											<div class="commitmentprogresshome" tabindex="0">
+												<svg viewBox="0 0 21 21" class="donesvgcommitment">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"/>
+												</svg>
+												<svg viewBox="4 3 17 17" class="editsvgcommitment">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+												</svg>
+											</div>
+											<div class="column">
+												<div class="commitmenttimehome">25 minutes left</div>
+												<div class="commitmentnamehome" tabindex="0">play some chess</div>
+											</div>
+										</div>
+										<div class="commitmenthome">
+											<div class="commitmentprogresshome" tabindex="0">
+												<svg viewBox="0 0 21 21" class="donesvgcommitment">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"/>
+												</svg>
+												<svg viewBox="4 3 17 17" class="editsvgcommitment">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+												</svg>
+											</div>
+											<div class="column">
+												<div class="commitmenttimehome">2 hours and 37 minutes left</div>
+												<div class="commitmentnamehome" tabindex="0">godot</div>
+											</div>
+										</div>
+										<div class="commitmenthome done">
+											<div class="commitmentprogresshome" tabindex="0">
+												<svg viewBox="0 0 21 21" class="donesvgcommitment">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"/>
+												</svg>
+												<svg viewBox="4 3 17 17" class="editsvgcommitment">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+												</svg>
+											</div>
+											<div class="column">
+												<div class="commitmenttimehome">Done</div>
+												<div class="commitmentnamehome" tabindex="0">Calculus</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="weeklych ch column">
+									<h1>Weekly<span class="timelefthome">(3 days left)</span></h1>
+									<div class="commitmentlisthome">
+										<div class="commitmenthome">
+											<div class="commitmentprogresshome" tabindex="0">
+												<svg viewBox="0 0 21 21" class="donesvgcommitment">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"/>
+												</svg>
+												<svg viewBox="4 3 17 17" class="editsvgcommitment">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"/>
+												</svg>
+											</div>
+											<div class="column">
+												<div class="commitmenttimehome">1724 more times</div>
+												<div class="commitmentnamehome" tabindex="0">practice bloodbath</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="monthlych ch column">
+									<h1>Monthly<span class="timelefthome">(1 week left)</span></h1>
+									<div class="commitmentlisthome">
+										
+									</div>
+								</div>
+								<div class="yearlych ch column">
+									<h1>Yearly<span class="timelefthome">(7 months left)</span></h1>
+									<div class="commitmentlisthome">
+										
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="accounthome column">
+							<div class="accounthomeheading headinghome" tabindex="0">
+								<svg viewBox="1 1 22 22" style="fill: none;">
+									<circle cx="12" cy="9" r="3" stroke="white" stroke-width="1.5"/>
+									<circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.5"/>
+									<path stroke="white" stroke-width="1.5" stroke-linecap="round" d="M17.9691 20C17.81 17.1085 16.9247 15 11.9999 15C7.07521 15 6.18991 17.1085 6.03076 20"/>
+								</svg>
+								<h1>Account</h1>
+							</div>
+							<div class="accounthome column">
+								<p class="emailtxthome">Email: <span class="emailhome">...</span></p>
+								<div class="accounthomebtncon">
+									<button id="signouthome" class="accounthomebtn">Sign Out</button>
+									<button id="deldatahome" class="accounthomebtn">Delete Data</button>
+									<button id="delaccounthome" class="accounthomebtn">Delete Account</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="tasks small" style="display: none;">
+						<div class="changesizecon">
+							<div>
+								<div class="smallsetting">
+									<svg viewBox="0 0 512 512">
+										<path d="M464 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm0 394c0 3.3-2.7 6-6 6H54c-3.3 0-6-2.7-6-6V192h416v234z"/>
+										<path d="M-1 312 L512 311Z" stroke-width="43"/>
+									</svg>
+								</div>
+								<div class="mediumsetting">
+									<svg viewBox="0 0 512 512">
+										<path d="M464 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm0 394c0 3.3-2.7 6-6 6H54c-3.3 0-6-2.7-6-6V192h416v234z"/>
+										<path d="M-1 312 L512 311Z" stroke-width="43"/>
+									</svg>
+								</div>
+								<div class="largesetting">
+									<svg viewBox="0 0 512 512">
+										<path d="M464 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm0 394c0 3.3-2.7 6-6 6H54c-3.3 0-6-2.7-6-6V192h416v234z"/>
+										<path d="M-1 312 L512 311Z" stroke-width="43"/>
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div class="sectiontasks tasklistcon column">
+							<h1>Section Tasks</h1>
+							<div class="sectiontasklist tasklist">
+								<div class="section column">
+									<div class="sectionheading">AP Pre-Calculus</div>
+									<div class="task">
+										<div class="info column">
+											<div class="name">integral worksheet</div>
+											<div class="desc"><div>js grind dailyintegral i guess js grind dailyintegral also watch some 3blue1brown ig</div></div>
+											<div class="date"><div>Wednesday</div></div>
+										</div>
+										<div class="flags column">
+											<div class="flag progress"><div><div>70%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+									<div class="task urgent" style="background: linear-gradient(to right, #00179b 50%, #030b57 0%);">
+										<div class="info column">
+											<div class="name">stuff idk</div>
+											<div class="desc"><div>chill</div></div>
+											<div class="gap"></div>
+											<div class="date"><div>Apr 8 2024</div></div>
+										</div>
+										<div class="flags column">
+											<div class="flag flagged">
+												<div><div>
+													<svg viewBox="1 1 16 16" fill="none">
+														<path d="M1 1V16H3V10H7L9 12H15V3H9L7 1H1Z"/>
+													</svg>
+												</div></div>
+											</div>
+											<div class="flag important">
+												<div><div>
+													<svg width="800px" height="800px" viewBox="0 0 64 64">
+														<path d="M22.989 42.439H13.01L9 2h18z" fill="#000000"/>
+														<ellipse cx="17.999" cy="54.354" rx="7.663" ry="7.646" fill="#000000"/>
+														<path d="M50.989 42.439H41.01L37 2h18z" fill="#000000"/>
+														<ellipse cx="45.999" cy="54.354" rx="7.663" ry="7.646" fill="#000000"/>
+													</svg>
+												</div></div>
+											</div>
+											<div class="flag progress"><div><div style="background: hsl(calc(pow(0.5, 2) * 125), 55%, 50%);">50%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+									<div class="task" style="background: linear-gradient(to right, #00179b 30%, #030b57 0%);">
+										<div class="info column">
+											<div class="name">the horrible and awful derivate worksheet of doom and despair</div>
+											<div class="desc"><div>start praying bro me lo puedo creer, ts gonna take like 28 hours. its js wraps gng, ur cooked. say goodbye to whatever free time you had left for the next 5 weeks</div></div>
+											<div class="date"><div>Day After Tomorrow</div></div>
+										</div>
+										<div class="flags column">
+											<!-- <div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div> -->
+											<div class="flag progress"><div><div style="background: hsl(calc(pow(0.3, 2) * 125), 55%, 50%);">30%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="section column">
+									<div class="sectionheading">Advanced Placement Physics C Electricity and Magnetism iewdio AP Physics C Electricity and Magnetism</div>
+									<div class="task" style="background: linear-gradient(to right, #00179b 80%, #030b57 0%);">
+										<div class="info column">
+											<div class="name">stuff idk</div>
+											<div class="desc"><div>chill</div></div>
+											<div class="date"><div>Apr 8 2024</div></div>
+										</div>
+										<div class="flags column">
+											<div class="flag progress"><div><div style="background: hsl(calc(pow(0.8, 2) * 125), 55%, 50%);">80%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="section column">
+									<div class="sectionheading">AP Pre-Calculus</div>
+									<div class="task">
+										<div class="info column">
+											<div class="name">integral worksheet</div>
+											<div class="desc"><div>js grind dailyintegral i guess js grind dailyintegral also watch some 3blue1brown ig</div></div>
+											<div class="date"><div>Wednesday</div></div>
+										</div>
+										<div class="flags column">
+											<div class="flag progress"><div><div>70%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+									<div class="task" style="background: linear-gradient(to right, #00179b 50%, #030b57 0%);">
+										<div class="info column">
+											<div class="name">stuff idk</div>
+											<div class="desc"><div>chill</div></div>
+											<div class="date"><div>Apr 8 2024</div></div>
+										</div>
+										<div class="flags column">
+											<div class="flag progress"><div><div style="background: hsl(calc(pow(0.5, 2) * 125), 55%, 50%);">50%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+									<div class="task" style="background: linear-gradient(to right, #00179b 30%, #030b57 0%);">
+										<div class="info column">
+											<div class="name">the horrible and awful derivate worksheet of doom and despair</div>
+											<div class="desc"><div>start praying bro me lo puedo creer, ts gonna take like 28 hours. its js wraps gng, ur cooked. say goodbye to whatever free time you had left for the next 5 weeks</div></div>
+											<div class="date"><div>Day After Tomorrow</div></div>
+										</div>
+										<div class="flags column">
+											<!-- <div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div>
+											<div class="flag">!!</div> -->
+											<div class="flag progress"><div><div style="background: hsl(calc(pow(0.3, 2) * 125), 55%, 50%);">30%</div></div></div>
+										</div>
+										<div class="options column">
+											<div class="done option">
+												<svg viewBox="0 0 21 21">
+													<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+												</svg>
+											</div>
+											<div class="edit option">
+												<svg viewBox="4 3 17 17">
+													<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+												</svg>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="sectionlesstasks tasklistcon column">
+							<h1>Other Tasks</h1>
+							<div class="sectionlesstasklist tasklist column">
+								<div class="task urgent" style="background: linear-gradient(to right, #00179b 100%, #030b57 0%);">
+									<div class="info column">
+										<div class="name">task</div>
+										<div class="desc"><div>description</div></div>
+										<div class="date"><div>Wednesday</div></div>
+									</div>
+									<div class="flags column">
+										<div class="flag progress"><div><div style="background: hsl(calc(pow(1, 2) * 125), 55%, 50%);">100%</div></div></div>
+									</div>
+									<div class="options column">
+										<div class="done option">
+											<svg viewBox="0 0 21 21">
+												<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+											</svg>
+										</div>
+										<div class="edit option">
+											<svg viewBox="4 3 17 17">
+												<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+											</svg>
+										</div>
+									</div>
+								</div>
+								<div class="task">
+									<div class="info column">
+										<div class="name">task</div>
+										<div class="date"><div>Wednesday</div></div>
+									</div>
+									<div class="flags column">
+										<div class="flag progress"><div><div>70%</div></div></div>
+									</div>
+									<div class="options column">
+										<div class="done option">
+											<svg viewBox="0 0 21 21">
+												<path d="M 0 12 l 3 -3 4 4 11 -11 3 3 -14 14 z"></path>
+											</svg>
+										</div>
+										<div class="edit option">
+											<svg viewBox="4 3 17 17">
+												<path fill-rule="evenodd" clip-rule="evenodd" d="M16.737 3.727a1.3 1.3 0 0 1 1.839 0l1.697 1.697a1.3 1.3 0 0 1 0 1.838L8.818 18.718a.5.5 0 0 1-.256.136l-3.535.707a.5.5 0 0 1-.589-.588l.708-3.535a.5.5 0 0 1 .136-.256l8.84-8.839 3.535 3.536.707-.707-3.536-3.536 1.91-1.91Z"></path>
+											</svg>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="commitments">
+						<h1>Commitments</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
