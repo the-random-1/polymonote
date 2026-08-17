@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<title>Polymonote</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<!-- <script type="module" src="signupfin.js" defer></script> -->
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+			import { getDatabase, ref, get, set, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+			import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+			const firebaseConfig = {
+				apiKey: "AIzaSyDhQPjLDSDtyFLLLgrKRnQ5Gnk8Z6Z6q7M",
+				authDomain: "polymonote.firebaseapp.com",
+				databaseURL: "https://polymonote-default-rtdb.firebaseio.com",
+				projectId: "polymonote",
+				storageBucket: "polymonote.firebasestorage.app",
+				messagingSenderId: "36644175050",
+				appId: "1:36644175050:web:792b2904c84b5da9ca0833"
+			};
+
+
+			// export {m as ActionCodeOperation, ActionCodeURL, AuthCredential, v as AuthErrorCodes, EmailAuthCredential, EmailAuthProvider, FacebookAuthProvider, l as FactorId, GithubAuthProvider, GoogleAuthProvider, OAuthCredential, OAuthProvider, f as OperationType, PhoneAuthCredential, PhoneAuthProvider, PhoneMultiFactorGenerator, h as ProviderId, RecaptchaVerifier, SAMLAuthProvider, p as SignInMethod, TotpMultiFactorGenerator, TotpSecret, TwitterAuthProvider, applyActionCode, beforeAuthStateChanged, D as browserCookiePersistence, O as browserLocalPersistence, ne as browserPopupRedirectResolver, L as browserSessionPersistence, checkActionCode, confirmPasswordReset, connectAuthEmulator, createUserWithEmailAndPassword, g as debugErrorMap, deleteUser, fetchSignInMethodsForEmail, getAdditionalUserInfo, getAuth, getIdToken, getIdTokenResult, getMultiFactorResolver, getRedirectResult, S as inMemoryPersistence, V as indexedDBLocalPersistence, initializeAuth, initializeRecaptchaConfig, isSignInWithEmailLink, linkWithCredential, linkWithPhoneNumber, linkWithPopup, linkWithRedirect, multiFactor, onAuthStateChanged, onIdTokenChanged, parseActionCodeURL, _ as prodErrorMap, reauthenticateWithCredential, reauthenticateWithPhoneNumber, reauthenticateWithPopup, reauthenticateWithRedirect, reload, revokeAccessToken, sendEmailVerification, sendPasswordResetEmail, sendSignInLinkToEmail, setPersistence, signInAnonymously, signInWithCredential, signInWithCustomToken, signInWithEmailAndPassword, signInWithEmailLink, signInWithPhoneNumber, signInWithPopup, signInWithRedirect, signOut, unlink, updateCurrentUser, updateEmail, updatePassword, updatePhoneNumber, updateProfile, useDeviceLanguage, validatePassword, verifyBeforeUpdateEmail, verifyPasswordResetCode};
+
+
+
+			const app = initializeApp(firebaseConfig);
+			const auth = getAuth();
+			const provider = new GoogleAuthProvider();
+			const db = getDatabase(app);
+
+			function saveData(key, value) {
+				set(ref(db, key), value);
+			}
+
+			function removeData(key) {
+				set(ref(db, key), null);
+			}
+
+			/*
+			get(child(ref(db), ---------key---------)).then((value) => {
+				value = value.val();
+				
+
+			});
+			onValue(ref(db, ---------key---------), (snapshot) => {
+				snapshot = snapshot.val();
+
+				
+			});
+			*/
+
+			// signInWithEmailAndPassword(auth, "rrajeshlolxd@gmail.com", "abcd123")
+			// .then(userCred => {
+			// 	console.log(userCred.user);
+			// })
+			// .catch(error => {
+			// 	console.log(error.code);
+			// 	console.log(error.message);
+			// });
+
+			const emailFromURL = new URL(window.location.href).searchParams.get("email");
+
+
+			document.styleSheets[document.styleSheets.length - 1].deleteRule(4);
+
+			for (var txt of document.querySelectorAll("div.signin p.signintext span.login")) {
+				txt.addEventListener("click", () => {
+					window.location.href = "login.html";
+				});
+			}
+
+			for (var emailInput of document.querySelectorAll("input[type=email]")) {
+				emailInput.value = emailFromURL;
+			}
+
+			document.querySelector("div.signin div.emailpassword button.signinbtn").addEventListener("click", attemptsignupwithpassword);
+			window.addEventListener("keydown", e => {
+				if (e.key == "Enter" && document.getElementById("emailInp") == document.activeElement) 
+					emailsignin();
+			});
+
+			function attemptsignupwithpassword() {
+				setTimeout(() => {
+					createUserWithEmailAndPassword(auth, emailFromURL, document.querySelector("input#passwordEP").value)
+					.then(userCred => {
+						const user = userCred.user;
+						Swal.fire({
+							title: user.email,
+							text: user.uid,
+							icon: "success"
+						});
+
+						// window.location.href = "main.html";
+					})
+					.catch(error => {
+						Swal.fire({
+							title: error.code,
+							text: error.message,
+							icon: "warning"
+						});
+					});
+				}, 0);
+			};
+
+			const actionCodeSettings = {
+				url: "https://www.example.com/finishSignUp?cartId=1234",
+				handleCodeInApp: true,
+				linkDomain: "custom-domain.com"
+			};
+
+			document.querySelector("div.signin div.emaillink button.signinbtn").addEventListener("click", () => {
+				sendSignInLinkToEmail(auth, emailFromURL, actionCodeSettings)
+				.then(() => {
+					document.body.innerHTML =  `<div class="signupemailfincon con">
+													<div class="signin column color1">
+														<h1>Check your email</h1>
+														<div class="column">
+															<p>We have sent a verification link to your email. Open the link to finish creating your account. You may close this tab after successfully signing in.</p>
+															<p>If you can't find it, check your junk and spam folders.</p>
+															<div></div>
+															<p>Didn't get an email? <span tabindex="1">Resend link</span></p>
+														</div>
+													</div>
+												</div>`;
+				})
+				.catch(error => {
+					setTimeout(() => {
+						Swal.fire({
+							title: error.code,
+							text: error.message,
+							icon: "warning"
+						});
+					}, 0);
+				});
+			});
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</head>
+	<body>
+		<div class="signupfincon con">
+			<div class="signin column color1">
+				<div class="column">
+					<h1>Welcome</h1>
+					<p>Finish creating your account</p>
+					<p class="signuptext signintext v2">Already have an account? <span tabindex="1" class="login">Log&nbsp;in</span></p>
+				</div>
+				<div class="credentials column">
+					<div class="emailpassword column">
+						<input id="emailEP" type="email" placeholder="Email" class="inp" disabled>
+						<input id="passwordEP" type="password" placeholder="Password" class="inp" tabindex="2">
+						<button class="signinbtn btn" tabindex="3">Sign in</button>
+					</div>
+					<p class="or">OR</p>
+					<div class="emaillink column">
+						<input id="emailEL" type="email" placeholder="Email" class="inp" disabled>
+						<button class="signinbtn btn" tabindex="4">Email Link</button>
+					</div>
+				</div>
+				<p class="logintext signintext v1">Already have an account? <span tabindex="5" class="login">Log&nbsp;in</span></p>
+			</div>
+		</div>
+	</body>
+</html>
