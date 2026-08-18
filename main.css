@@ -922,14 +922,14 @@ div.con {
 	overflow: hidden;
 }
 
-.maincon .content .tasks * {
+.maincon .content .tasks::-webkit-scrollbar {
+	display: none;
+}
+
+.tasks * {
 	box-sizing: border-box;
 	transition: all 300ms;
 	/* user-select: none; */
-}
-
-.maincon .content .tasks::-webkit-scrollbar {
-	display: none;
 }
 
 .tasks .tasklistcon {
@@ -979,6 +979,7 @@ div.con {
 
 .tasks .tasklistcon > h1 {
 	font-size: calc(var(--contentwindowscale) * 0.08);
+	font-family: "Roboto", sans-serif;
 }
 
 .tasks .tasklist {
@@ -1465,8 +1466,51 @@ div.con {
 	height: calc(var(--contentwindowscale) * 0.03);
 }
 
+.maincon .content .commitments,
+.maincon .content .commitments * {
+	box-sizing: border-box;
+}
+
 .maincon .content .commitments {
+	justify-content: flex-start;
+	padding: calc(var(--contentwindowscale) * 0.035);
+}
+
+.commitments > h1 {
+	font-size: calc(var(--contentwindowscale) * 0.06);
+	font-family: "Roboto", sans-serif;
+}
+
+.commitments .commitmentscon {
+	flex: 1 1 0;
 	display: grid;
+	grid-template-areas: "critical critical"
+						 "daily weekly"
+						 "monthly yearly";
+}
+
+.commitments > * {
+	width: 100%;
+}
+
+.commitments .commitmentscon .critical {
+	grid-area: critical;
+}
+
+.commitments .commitmentscon .daily {
+	grid-area: daily;
+}
+
+.commitments .commitmentscon .weekly {
+	grid-area: weekly;
+}
+
+.commitments .commitmentscon .monthly {
+	grid-area: monthly;
+}
+
+.commitments .commitmentscon .yearly {
+	grid-area: yearly;
 }
 
 
